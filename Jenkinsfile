@@ -1,21 +1,23 @@
+#!groovy
+
 pipeline {
-    agent any
-
-    stages {
-        stage('Git Checkout') {
-            steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: '2de5b3be-ad42-4b1a-9e21-05c78c7104d3', url: 'https://github.com/Ronaldosoaresdeb/jsoncrack.com.git']]])
-            }
+	agent none
+  stages {
+  	stage('Maven Install') {
+    	agent {
+      	docker {
+        	image 'maven:3.5.0'
         }
-        stage('Build docker image'){
-            steps{
-                script{
-                    sh 'docker build -t jsoncrack .'
-                }
-            }
-        }
-
-        
+      }
+      steps {
+      	sh 'mvn clean install'
+      }
     }
+    stage('Docker Build') {
+    	agent any
+      steps {
+      	sh 'docker build -t shanem/spring-petclinic:latest .'
+      }
+    }
+  }
 }
-
